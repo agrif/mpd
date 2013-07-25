@@ -21,6 +21,7 @@
 #include "OutputList.hxx"
 #include "output_api.h"
 #include "output/AlsaOutputPlugin.hxx"
+#include "output/AerialOutputPlugin.hxx"
 #include "output/AoOutputPlugin.hxx"
 #include "output/FifoOutputPlugin.hxx"
 #include "output/HttpdOutputPlugin.hxx"
@@ -53,6 +54,9 @@ const struct audio_output_plugin *const audio_output_plugins[] = {
 #endif
 #ifdef HAVE_ROAR
 	&roar_output_plugin,
+#endif
+#ifdef HAVE_AERIAL
+	&aerial_output_plugin,
 #endif
 #ifdef HAVE_AO
 	&ao_output_plugin,

@@ -165,6 +165,11 @@ AC_ARG_ENABLE(roar,
 		[enable support for RoarAudio]),,
 	[enable_roar=auto])
 
+AC_ARG_ENABLE(aerial,
+	AS_HELP_STRING([--enable-aerial],
+		[enable support for AirPlay with libaerial]),,
+	enable_aerial=auto)
+
 AC_ARG_ENABLE(ao,
 	AS_HELP_STRING([--enable-ao],
 		[enable support for libao]),,
@@ -1316,6 +1321,16 @@ fi
 
 AM_CONDITIONAL(HAVE_JACK, test x$enable_jack = xyes)
 
+dnl -------------------------------- libaerial --------------------------------
+MPD_AUTO_PKG(aerial, AERIAL, [aerial],
+	[AirPlay output plugin], [libaerial not found])
+if test x$enable_aerial = xyes; then
+	AC_DEFINE(HAVE_AERIAL, 1,
+		[Define to enable AirPlay support with libaerial])
+fi
+
+AM_CONDITIONAL(HAVE_AERIAL, test x$enable_aerial = xyes)
+
 dnl ---------------------------------- libao ----------------------------------
 MPD_AUTO_PKG(ao, AO, [ao],
 	[libao output plugin], [libao not found])
@@ -1459,6 +1474,7 @@ dnl --------------------- Post Audio Output Plugins Tests ---------------------
 if
 	test x$enable_alsa = xno &&
 	test x$enable_roar = xno &&
+	test x$enable_aerial = xno &&
 	test x$enable_ao = xno &&
 	test x$enable_fifo = xno &&
 	test x$enable_httpd_output = xno &&
@@ -1618,6 +1634,7 @@ results(recorder_output,[File Recorder])
 results(httpd_output,[HTTP Daemon])
 results(jack,[JACK])
 printf '\n\t'
+results(aerial,[AirPlay])
 results(ao,[libao])
 results(oss,[OSS])
 results(openal,[OpenAL])

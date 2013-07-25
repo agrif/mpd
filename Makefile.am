@@ -740,6 +740,7 @@ endif
 
 
 liboutput_plugins_a_CPPFLAGS = $(AM_CPPFLAGS) \
+	$(AERIAL_CFLAGS) \
 	$(AO_CFLAGS) \
 	$(ALSA_CFLAGS) \
 	$(JACK_CFLAGS) \
@@ -751,6 +752,7 @@ liboutput_plugins_a_CPPFLAGS = $(AM_CPPFLAGS) \
 OUTPUT_LIBS = \
 	liboutput_plugins.a \
 	$(LIBWRAP_LDFLAGS) \
+	$(AERIAL_LIBS) \
 	$(AO_LIBS) \
 	$(ALSA_LIBS) \
 	$(ROAR_LIBS) \
@@ -806,6 +808,11 @@ if HAVE_ROAR
 liboutput_plugins_a_SOURCES += \
 	src/output/RoarOutputPlugin.cxx src/output/RoarOutputPlugin.hxx
 libmixer_plugins_a_SOURCES += src/mixer/RoarMixerPlugin.cxx
+endif
+
+if HAVE_AERIAL
+liboutput_plugins_a_SOURCES += \
+	src/output/AerialOutputPlugin.cxx src/output/AerialOutputPlugin.hxx
 endif
 
 if HAVE_AO
