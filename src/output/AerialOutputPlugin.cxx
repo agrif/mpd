@@ -34,6 +34,10 @@ struct AerialOutput {
 	
 	GError *async_error;
 	AerialClient *client;
+	
+	gchar *queued_title;
+	gchar *queued_artist;
+	gchar *queued_album;
 };
 
 static inline GQuark
@@ -57,6 +61,10 @@ aerial_output_init(const config_param *param, GError **error_r)
 	ad->client = nullptr;
 	ad->async_error = nullptr;
 	
+	ad->queued_title = nullptr;
+	ad->queued_artist = nullptr;
+	ad->queued_album = nullptr;
+	
 	return &ad->base;
 }
 
@@ -79,6 +87,13 @@ aerial_output_close(struct audio_output *ao)
 	aerial_client_disconnect_from_host_async(ad->client, NULL, NULL);
 	g_object_unref(ad->client);
 	ad->client = nullptr;
+	
+	g_free(ad->queued_title);
+	ad->queued_title = nullptr;
+	g_free(ad->queued_artist);
+	ad->queued_artist = nullptr;
+	g_free(ad->queued_album);
+	ad->queued_album = nullptr;
 }
 
 static void
@@ -93,7 +108,20 @@ static void
 aerial_on_play(GObject *src, GAsyncResult *res, gpointer data)
 {
 	AerialClient *ac = AERIAL_CLIENT(src);
+	AerialOutput *ad = (AerialOutput *)data;
+	
 	bool success = aerial_client_play_finish(ac, res, NULL);
+	if (success) {
+		if (ad->queued_title || ad->queued_artist || ad->queued_album)
+			aerial_client_set_metadata_async(ac, ad->queued_title, ad->queued_artist, ad->queued_album, NULL, NULL, NULL);
+		
+		g_free(ad->queued_title);
+		ad->queued_title = nullptr;
+		g_free(ad->queued_artist);
+		ad->queued_artist = nullptr;
+		g_free(ad->queued_album);
+		ad->queued_album = nullptr;
+	}
 }
 
 static void
@@ -144,6 +172,31 @@ aerial_output_delay(struct audio_output *ao)
 	return 0;
 }
 
+static void
+aerial_output_send_tag(struct audio_output *ao, const struct tag *tag)
+{
+	AerialOutput *ad = (AerialOutput *)ao;
+	
+	const char *title = tag_get_value(tag, TAG_TITLE);
+	if (title == nullptr)
+		title = tag_get_value(tag, TAG_NAME);
+	const char *artist = tag_get_value(tag, TAG_ARTIST);
+	if (artist == nullptr)
+		title = tag_get_value(tag, TAG_ALBUM_ARTIST);
+	const char *album = tag_get_value(tag, TAG_ALBUM);
+	
+	if (aerial_client_get_state(ad->client) != AERIAL_CLIENT_STATE_PLAYING) {
+		g_free(ad->queued_title);
+		ad->queued_title = g_strdup(title);
+		g_free(ad->queued_artist);
+		ad->queued_artist = g_strdup(artist);
+		g_free(ad->queued_album);
+		ad->queued_album = g_strdup(album);
+	} else {
+		aerial_client_set_metadata_async(ad->client, title, artist, album, NULL, NULL, NULL);
+	}
+}
+
 static size_t
 aerial_output_play(struct audio_output *ao, const void *chunk, size_t size,
 				   GError **error)
@@ -174,7 +227,7 @@ const struct audio_output_plugin aerial_output_plugin = {
 	aerial_output_open,
 	aerial_output_close,
 	aerial_output_delay,
-	nullptr,
+	aerial_output_send_tag,
 	aerial_output_play,
 	nullptr,
 	nullptr,
