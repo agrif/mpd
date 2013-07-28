@@ -813,6 +813,8 @@ endif
 if HAVE_AERIAL
 liboutput_plugins_a_SOURCES += \
 	src/output/AerialOutputPlugin.cxx src/output/AerialOutputPlugin.hxx
+libmixer_plugins_a_SOURCES += \
+	src/mixer/AerialMixerPlugin.cxx
 endif
 
 if HAVE_AO

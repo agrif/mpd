@@ -20,6 +20,11 @@
 #ifndef MPD_AERIAL_OUTPUT_PLUGIN_HXX
 #define MPD_AERIAL_OUTPUT_PLUGIN_HXX
 
+#include "output_api.h"
+
 extern const struct audio_output_plugin aerial_output_plugin;
+
+extern void aerial_output_set_volume(struct audio_output *ao, unsigned volume);
+extern unsigned aerial_output_get_volume(struct audio_output *ao);
 
 #endif

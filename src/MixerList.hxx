@@ -26,6 +26,7 @@
 #define MPD_MIXER_LIST_HXX
 
 extern const struct mixer_plugin software_mixer_plugin;
+extern const struct mixer_plugin aerial_mixer_plugin;
 extern const struct mixer_plugin alsa_mixer_plugin;
 extern const struct mixer_plugin oss_mixer_plugin;
 extern const struct mixer_plugin roar_mixer_plugin;
